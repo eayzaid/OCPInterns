@@ -1,7 +1,7 @@
 import { Button } from "../../Components/ui/button";
 import { InputForm, SelectForm } from "../../Components/CustomUi/Inputs";
 import { useForm } from "react-hook-form";
-import { useLayoutEffect, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { Form } from "../../Components/ui/form";
 import { OCPMajorFields } from "../../../Data";
 import { SelectField } from "./MentorManager";
@@ -22,7 +22,7 @@ import { toast } from "sonner";
 
 //registration when no mentor have been passed , an edit when the mentor have been passed as a prop
 
-export default function AddEditMentor({ mentor, departments ,onEditing }) {
+export default function AddEditMentor({ mentor, departments, onEditing }) {
   // Extend the validation schema to require departmentName to be one of departments
   const ExtendedSignUpSchemaValidation = yup.object().shape({
     ...SignUpSchemaValidation.fields,
@@ -48,6 +48,7 @@ export default function AddEditMentor({ mentor, departments ,onEditing }) {
     resolver: yupResolver(ExtendedSignUpSchemaValidation),
   });
   const [fields, setFields] = useState([]);
+  const initialRefresh = useRef(true);
 
   useLayoutEffect(() => {
     const fetchMentorData = async () => {
@@ -65,20 +66,26 @@ export default function AddEditMentor({ mentor, departments ,onEditing }) {
             formObject.setValue("departmentName", mentor.departmentName);
             setFields(mentor.fields || []); // Add fallback for fields
           } else {
-            console.error("Fetch failed with status:", response.status);
-            // Don't use alert as it might cause issues - use console instead
-            console.error("User Fetch Failed");
+            throw new Error();
           }
         } else {
-          console.log("No mentor to fetch, creating new mentor");
+          throw new Error();
         }
       } catch (error) {
-        console.error("Error in fetchMentorData:", error);
-        // Don't throw the error, just log it
+        throw new Error();
       }
     };
 
-    fetchMentorData();
+    if (!initialRefresh.current) {
+      toast.promise(fetchMentorData, {
+        loading: "Loading...",
+        success: () => {
+          return `${data.firstName} ${data.lastName} has been created`;
+        },
+        error: `Something went wrong fetching the mentor`,
+      });
+    }
+    initialRefresh.current = false;
   }, [mentor]); // Add mentor as dependency
 
   const onSubmit = (data) => {
@@ -94,15 +101,20 @@ export default function AddEditMentor({ mentor, departments ,onEditing }) {
         },
         error: `There was a problem during the deletion of ${data.firstName} ${data.lastName}`,
       });
-    } //update the mentor 
+    } //update the mentor
     else {
       userData = { userId: mentor.mentorId, ...userData };
-      const mentorFullName = `${data.firstName} ${data.lastName}`
+      const mentorFullName = `${data.firstName} ${data.lastName}`;
       toast.promise(updateMentor(userData), {
         loading: "Loading...",
         success: () => {
-          const displayedEditedMentor = {...mentor , mentorFullName , fields : userData.fields , departmentName: userData.departmentName }
-          onEditing(displayedEditedMentor)
+          const displayedEditedMentor = {
+            ...mentor,
+            mentorFullName,
+            fields: userData.fields,
+            departmentName: userData.departmentName,
+          };
+          onEditing(displayedEditedMentor);
           return `${mentorFullName} has been updated`;
         },
         error: `There was a problem during the update of ${mentorFullName}`,
