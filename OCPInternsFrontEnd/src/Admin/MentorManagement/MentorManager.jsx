@@ -10,7 +10,11 @@ import {
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
 import { OCPMajorFields } from "../../../Data";
-import { fetchDepartments, fetchMentors, deleteMentor } from "./Fetch";
+import {
+  fetchDepartments,
+  fetchMentors,
+  deleteMentor,
+} from "./Fetch";
 import { useAuth } from "../../Hooks";
 import MentorCard from "./MentorCard";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
@@ -80,7 +84,10 @@ export default function MentorManager() {
   const fetchResults = async (path) => {
     const response = await fetchMentors(path);
     if (response.status === 200) return response.data;
-    else alert("Problem during mentor fetch");
+    else {
+      setMentors([]);
+      alert("Problem during mentor fetch");
+    }
   };
 
   //submit the filter options
@@ -111,7 +118,7 @@ export default function MentorManager() {
             `?fullName=${encodeURIComponent(select.value)}`
           );
           setMentors(fetchedMentors);
-          break;          
+          break;
         default:
           setMentors([]);
           throw new Error("set a fetching method");
@@ -212,7 +219,7 @@ export default function MentorManager() {
             </div>
             <div
               className={
-                "grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-1 place-self-center py-2" +
+                "grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-1 place-items-center py-2" +
                 (mentors.length === 0 ? "h-96" : "")
               }
             >
@@ -229,7 +236,9 @@ export default function MentorManager() {
                     />
                   ))}
                 {mentor && (
-                  <AddEditMentor mentor={mentor} departments={departments} />
+                  <AddEditMentor mentor={mentor} departments={departments} onEditing={(mentor) => setMentors(mentors.map(
+                    (element) => element.mentorId === mentor.mentorId ? mentor : element
+                  ))} />
                 )}
               </Dialog>
             </div>

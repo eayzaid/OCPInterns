@@ -58,3 +58,14 @@ export async function deleteMentor(mentorId) {
     throw error;
   }
 }
+
+
+export async function updateMentor(userData) {
+  try {
+    const response = await axios.put(`${apiURL}/user/edit/mentor` , userData);
+    return response;
+  } catch (error) {
+    if (error.response) return error.response;
+    throw error;
+  }
+}

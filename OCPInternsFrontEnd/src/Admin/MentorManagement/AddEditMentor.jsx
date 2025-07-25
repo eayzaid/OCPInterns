@@ -12,16 +12,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { X } from "lucide-react";
 import { Badge } from "../../Components/ui/badge";
 import { Label } from "../../Components/ui/label";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { fetchUser, register } from "./Fetch";
+import { fetchUser, register, updateMentor } from "./Fetch";
 import { toast } from "sonner";
 
 //registration when no mentor have been passed , an edit when the mentor have been passed as a prop
 
-export default function AddEditMentor({ mentor, departments }) {
+export default function AddEditMentor({ mentor, departments ,onEditing }) {
   // Extend the validation schema to require departmentName to be one of departments
   const ExtendedSignUpSchemaValidation = yup.object().shape({
     ...SignUpSchemaValidation.fields,
@@ -29,15 +30,18 @@ export default function AddEditMentor({ mentor, departments }) {
       .string()
       .oneOf(departments, "Please select a valid department")
       .required("Department is required"),
-    password: mentor 
+    password: mentor
       ? yup.string().nullable().optional()
-      : yup.string().required("Password is required")
+      : yup
+          .string()
+          .required("Password is required")
           .min(8, "Password must be at least 8 characters"),
     confirmPassword: mentor
       ? yup.string().nullable().optional()
-      : yup.string()
+      : yup
+          .string()
           .required("Please confirm your password")
-          .oneOf([yup.ref("password")], "Passwords must match")
+          .oneOf([yup.ref("password")], "Passwords must match"),
   });
 
   const formObject = useForm({
@@ -46,19 +50,12 @@ export default function AddEditMentor({ mentor, departments }) {
   const [fields, setFields] = useState([]);
 
   useLayoutEffect(() => {
-    // Check if it's editing or adding, and fetch mentor information if editing
     const fetchMentorData = async () => {
       try {
-        console.log("Mentor prop:", mentor); // Debug log
-
         if (mentor && mentor.mentorId) {
-          console.log("Fetching mentor data for:", mentor.mentorId); // Debug log
-
           const response = await fetchUser(
             `?role=mentor&userId=${mentor.mentorId}`
           );
-
-          console.log("Fetch response:", response); // Debug log
 
           if (response.status === 200) {
             const mentorInitialData = response.data;
@@ -67,7 +64,6 @@ export default function AddEditMentor({ mentor, departments }) {
             formObject.setValue("email", mentorInitialData.email);
             formObject.setValue("departmentName", mentor.departmentName);
             setFields(mentor.fields || []); // Add fallback for fields
-            console.log("l7wa ana hna");
           } else {
             console.error("Fetch failed with status:", response.status);
             // Don't use alert as it might cause issues - use console instead
@@ -88,16 +84,29 @@ export default function AddEditMentor({ mentor, departments }) {
   const onSubmit = (data) => {
     data = { fields, ...data }; //assemble all infos
     let { confirmPassword, ...userData } = data; //take the confirm part Off
+
+    //if register ===> mentor is undefined
     if (!mentor) {
       toast.promise(register(userData), {
         loading: "Loading...",
         success: () => {
-          return `${ data.firstName + " " + data.lastName} has been created`;
+          return `${data.firstName} ${data.lastName} has been created`;
         },
-        error: `There was a problem during the deletion of ${mentorFullName}`,
+        error: `There was a problem during the deletion of ${data.firstName} ${data.lastName}`,
       });
-    } else {
-      userData = { mentorId: mentor.mentorId, ...userData };
+    } //update the mentor 
+    else {
+      userData = { userId: mentor.mentorId, ...userData };
+      const mentorFullName = `${data.firstName} ${data.lastName}`
+      toast.promise(updateMentor(userData), {
+        loading: "Loading...",
+        success: () => {
+          const displayedEditedMentor = {...mentor , mentorFullName , fields : userData.fields , departmentName: userData.departmentName }
+          onEditing(displayedEditedMentor)
+          return `${mentorFullName} has been updated`;
+        },
+        error: `There was a problem during the update of ${mentorFullName}`,
+      });
     }
   };
 
@@ -156,18 +165,26 @@ export default function AddEditMentor({ mentor, departments }) {
             className="w-full text-black"
           />
           <Label>Fields</Label>
-          <div className="flex flex-wrap gap-1 bg-green-300 p-1 w-9/10 rounded">
+          <div className="flex flex-wrap gap-1  bg-emerald-900 p-1 w-9/10 rounded">
             {fields.map((field, idx) => (
               <Badge
                 key={idx}
                 variant="secondary"
-                className="text-white bg-emerald-600 border-1 border-green-300 shadow-2xs"
+                className="text-green-950 bg-green-100 border-1 border-green-300 shadow-2xs"
               >
                 {field}
+                <div className="scale-75">
+                  <X
+                    className="text-red-700"
+                    onClick={() => {
+                      setFields(fields.filter((element) => element !== field));
+                    }}
+                  />
+                </div>
               </Badge>
             ))}
             <SelectField
-              className="h-0.5"
+              className="h-0.5 placeholder-white"
               placeholder="+ Add"
               onChange={(value) => {
                 if (!fields.includes(value)) setFields([value, ...fields]);

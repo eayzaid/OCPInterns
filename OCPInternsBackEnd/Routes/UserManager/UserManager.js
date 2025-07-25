@@ -3,15 +3,17 @@ const userAuthentification = require("../../Authentification/UserAuthentificatio
 const userRegistration = require("./UserRegistration");
 const userDelete = require("./UserDelete");
 const userHandler = require("../../DatabasesHandlers/UserManagement/UserManagementHandler");
+const userEdit = require("./UserEdit");
 
 const router = express.Router();
 router.use(express.json());
 
 router.use("/create", userRegistration);
+router.use("/edit", userEdit);
 router.post("/auth", userAuthentification.userAuthentification);
 router.get("/refresh", userAuthentification.refreshAccessToken);
 router.get("/logout", userAuthentification.userLogout);
-router.use("/delete", userDelete)
+router.use("/delete", userDelete);
 
 router.use(userAuthentification.authenticateToken);
 

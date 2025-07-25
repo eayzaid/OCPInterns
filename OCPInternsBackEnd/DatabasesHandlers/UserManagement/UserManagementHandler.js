@@ -213,7 +213,51 @@ async function deleteUser(UserRole,userId){
   }
 }
 
+async function updateUser(UserRole, userId, updateDoc) {
+  try {
+    // Fetch existing user to check existence and capture old email
+    const existing = await UserRole.findOne({ userId });
+    if (!existing) {
+      const err = new Error("User not found");
+      err.statusCode = 404;
+      throw err;
+    }
+
+    // If password is being updated, hash it
+    if (updateDoc.password) {
+      updateDoc.password = await hash(updateDoc.password);
+    }
+
+    const oldEmail = existing.email;
+    // Perform the update and return the new document
+    const updatedUser = await UserRole.findOneAndUpdate(
+      { userId },
+      updateDoc,
+      { new: true, runValidators: true }
+    );
+
+    // If the email changed, update it in the roles collection as well
+    if (updateDoc.email && updateDoc.email !== oldEmail) {
+      await RoleModel.updateOne(
+        { email: oldEmail },
+        { $set: { email: updateDoc.email.trim().toLowerCase() } }
+      );
+    }
+
+    return updatedUser;
+  } catch (error) {
+    // Validation errors → 400, others → 500
+    if (error instanceof mongoose.Error.ValidationError) {
+      error.statusCode = 400;
+    } else if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    throw error;
+  }
+}
+
 module.exports = {
+  updateUser,
   checkCredentials,
   CandidateModel,
   RecruiterModel,

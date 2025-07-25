@@ -4,12 +4,11 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "../../Components/ui/dropdown-menu";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import { DialogTrigger } from "@/components/ui/dialog";
 import { MoreHorizontal, Edit, MapPin, Users, Delete } from "lucide-react";
 import { Card, CardContent } from "../../Components/ui/card";
 import { Badge } from "../../Components/ui/badge";
 import { Button } from "../../Components/ui/button";
-import AddEditMentor from "./AddEditMentor";
 /*
 Mentor : 
     mentorId 
@@ -22,7 +21,7 @@ export default function MentorCard({ mentor, onEditing, onDelete }) {
   return (
     <Card
       key={mentor.mentorId}
-      className="border-emerald-100 hover:shadow-lg transition-shadow w-full max-w-xs"
+      className="h-80 border-green-400 border-1 hover:shadow-lg transition-shadow w-full max-w-xs"
     >
       <CardContent className="p-6">
         <div className="flex items-start justify-between mb-4">

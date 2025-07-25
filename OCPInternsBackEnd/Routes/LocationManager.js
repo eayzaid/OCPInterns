@@ -36,7 +36,6 @@ router.get("/view", async (req, res, next) => {
   try {
     //this will get all mentors from a single department
     if (req.query.department || req.query.field || req.query.fullName) {
-      console.log(req.query);
 
       const projecton = {
         departmentName: 1,
