@@ -20,3 +20,5 @@ async function closeConnection (){
         throw err; 
     }
 }
+
+module.exports = { establishConnection , closeConnection }; 
