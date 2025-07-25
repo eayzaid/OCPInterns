@@ -1,0 +1,22 @@
+2- add the naming functionality to the navbar , with the option to edit profie 
+3- clean console from the error.statusCode coming from api calls
+4- add messages to highlight what problems occur durign the api calls 
+5- redirecting to '/auth' when getting 401 response code
+6- making loading effect when fetching :
+    -> when submiting forms ( apply application , registration , login )
+    -> when fecthing applications 
+upgrade UI 
+implement lazy loading to augmente performance 
+finish the scroll in the applications
+capitalize names in backend 
+
+
+
+
+
+done : 
+1-do the applcaiotnid trick in the form , and confirm form submission tomorrow
+7- do grid in intership information table 
+1- fix the access token problem ( when refreshing the page , the authProvider lose state and need refresh ) 
+finish the intership status form validation 
+
