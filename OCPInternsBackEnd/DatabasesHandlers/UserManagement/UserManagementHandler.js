@@ -203,13 +203,26 @@ async function getUserRoleByEmail(email) {
   }
 }
 
-async function deleteUser(UserRole,userId){
-  try{
-    const res = await UserRole.deleteOne({userId: userId})
-    return res
-  }catch(error){
-    error.statusCode = 500
-    throw error
+async function deleteUser(UserRole, userId) {
+  try {
+    // Find the user to get their email
+    const user = await UserRole.findOne({ userId });
+    if (!user) {
+      const err = new Error("User not found");
+      err.statusCode = 404;
+      throw err;
+    }
+
+    // Delete from the user collection
+    const userDeleteRes = await UserRole.deleteOne({ userId });
+
+    // Also delete the corresponding role entry
+    await RoleModel.deleteOne({ email: user.email });
+
+    return userDeleteRes;
+  } catch (error) {
+    if (!error.statusCode) error.statusCode = 500;
+    throw error;
   }
 }
 
@@ -268,5 +281,6 @@ module.exports = {
   getUserRole,
   getUserModel,
   getUserRoleByEmail,
-  findUser
+  findUser,
+  findUsers
 };

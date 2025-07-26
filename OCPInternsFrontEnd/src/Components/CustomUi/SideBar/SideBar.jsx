@@ -35,7 +35,7 @@ export default function SideBar({ isAdmin , user }) {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <Link>
+                  <Link to="/admin/applications">
                     <FileCheck />
                     <span>Application Management</span>
                   </Link>
@@ -50,13 +50,15 @@ export default function SideBar({ isAdmin , user }) {
                 <SidebarMenu>
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild>
-                      <Link>
+                      <Link to="/admin/recruiters">
                         <Users />
                         <span>Recruiters</span>
                       </Link>
                     </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
                     <SidebarMenuButton asChild>
-                      <Link>
+                      <Link to="/admin/mentors">
                         <Users />
                         <span>Mentors</span>
                       </Link>

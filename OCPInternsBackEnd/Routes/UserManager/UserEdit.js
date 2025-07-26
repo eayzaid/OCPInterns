@@ -37,4 +37,28 @@ router.put("/mentor", async (req, res, next) => {
   }
 });
 
+router.put("/recruiter", async (req, res, next) => {
+  try {
+    if (req.role !== "admin") {
+      const error = new Error(
+        "client is not allowed to get the requested resources"
+      );
+      error.statusCode = 403;
+      throw error;
+    }
+
+    const authData = req.body;
+
+    const userDoc = await userHandler.updateUser(
+      userHandler.getUserModel("recruiter"),
+      authData.userId,
+      authData
+    ); //edit the auth info to the appropriate collection
+
+    res.status(200).end();
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;

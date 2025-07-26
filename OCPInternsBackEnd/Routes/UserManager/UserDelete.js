@@ -34,4 +34,21 @@ router.delete("/mentor", async (req, res, next) => {
   }
 });
 
+router.delete("/recruiter", async (req, res, next) => {
+  try {
+    if (!req.query.userId) {
+      const error = new Error("client sent a bad request");
+      error.statusCode = 400;
+      throw error;
+    }
+    await userHandler.deleteUser(       //delete authentication info of the recruiter
+      userHandler.getUserModel("recruiter"),
+      req.query.userId
+    );
+    res.status(200).end();
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;
