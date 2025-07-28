@@ -108,4 +108,37 @@ router.get("/", async (req, res, next) => {
   }
 });
 
+//used to get current user's info based on token
+router.get("/init", async (req, res, next) => {
+  try {
+    const projection = {
+      firstName: 1,
+      lastName: 1,
+      email: 1,
+      _id: 0,
+    };
+
+    const user = await userHandler.findUser(
+      userHandler.getUserModel(req.role),
+      {
+        userId: req.userId,
+      },
+      projection
+    );
+
+    if (!user) {
+      const error = new Error("User not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    res.status(200).json({
+      fullName: `${user.firstName} ${user.lastName}`,
+      email: user.email
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;

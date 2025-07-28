@@ -14,7 +14,7 @@ import {
   fetchDepartments,
   fetchMentors,
   deleteMentor,
-} from "./Fetch";
+} from "./Fetch.js";
 import { useAuth } from "../../Hooks";
 import MentorCard from "./MentorCard";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
@@ -51,6 +51,19 @@ export const SelectField = ({
   );
 };
 
+const EmptyState = ({ hasSearched }) => (
+  <div className="col-span-full flex flex-col justify-center items-center h-64">
+    <h1 className="text-2xl font-bigtitle text-green-800 mb-2">
+      {hasSearched ? "No mentors found" : "Start Your Search"}
+    </h1>
+    {!hasSearched && (
+      <p className="text-gray-600 text-center">
+        Select filter criteria and click "Filter" to find mentors
+      </p>
+    )}
+  </div>
+);
+
 export default function MentorManager() {
   const [select, setSelect] = useState({
     option: "fullName",
@@ -60,6 +73,7 @@ export default function MentorManager() {
   const [mentors, setMentors] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [mentor, setMentor] = useState(null);
+  const [hasSearched, setHasSearched] = useState(false);
   const { accessToken } = useAuth();
 
   //inital load departements
@@ -123,6 +137,7 @@ export default function MentorManager() {
           setMentors([]);
           throw new Error("set a fetching method");
       }
+      setHasSearched(true); // Mark that a search has been performed
     };
     toast.promise(submitHanlder, {
       loading: "Loading...",
@@ -176,7 +191,7 @@ export default function MentorManager() {
             </Dialog>
           </div>
           <div className="bg-green-50 w-9/10 p-4">
-            <div className="flex flex-wrap sm:flex-nowrap justify-between gap-1 ">
+            <div className="flex justify-between gap-2 mb-4">
               {select.option !== "fullName" ? (
                 <SelectField
                   className="flex-1"
@@ -195,6 +210,7 @@ export default function MentorManager() {
                 />
               ) : (
                 <Input
+                  className="flex-1"
                   placeholder="Mentor's Full Name"
                   value={select.value}
                   onChange={(e) => {
@@ -217,14 +233,11 @@ export default function MentorManager() {
                 Filter
               </Button>
             </div>
-            <div
-              className={
-                "grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-1 place-items-center py-2" +
-                (mentors.length === 0 ? "h-96" : "")
-              }
-            >
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 place-self-center auto-rows-fr">
               <Dialog>
-                {mentors.length !== 0 &&
+                {!hasSearched ? (
+                  <EmptyState hasSearched={false} />
+                ) : mentors.length > 0 ? (
                   mentors.map((mentor, idx) => (
                     <MentorCard
                       key={idx}
@@ -234,11 +247,18 @@ export default function MentorManager() {
                         onDelete(mentor.mentorId, mentor.mentorFullName)
                       }
                     />
-                  ))}
+                  ))
+                ) : (
+                  <EmptyState hasSearched={true} />
+                )}
                 {mentor && (
-                  <AddEditMentor mentor={mentor} departments={departments} onEditing={(mentor) => setMentors(mentors.map(
-                    (element) => element.mentorId === mentor.mentorId ? mentor : element
-                  ))} />
+                  <AddEditMentor 
+                    mentor={mentor} 
+                    departments={departments} 
+                    onEditing={(mentor) => setMentors(mentors.map(
+                      (element) => element.mentorId === mentor.mentorId ? mentor : element
+                    ))} 
+                  />
                 )}
               </Dialog>
             </div>
@@ -248,4 +268,3 @@ export default function MentorManager() {
     </>
   );
 }
-//<h1 className="text-2xl font-bigtitle text-green-800" >No Search commited</h1>

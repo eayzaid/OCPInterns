@@ -92,6 +92,7 @@ export default function RecruiterCard({ recruiter, onEdit, onDelete }) {
 
         {/* Action Buttons - Always at bottom */}
         <div className="flex justify-between pt-3 border-t border-gray-100 mt-auto">
+            
           <Button
             variant="outline"
             size="sm"
@@ -133,6 +134,7 @@ export default function RecruiterCard({ recruiter, onEdit, onDelete }) {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
+        
         </div>
       </CardContent>
     </Card>

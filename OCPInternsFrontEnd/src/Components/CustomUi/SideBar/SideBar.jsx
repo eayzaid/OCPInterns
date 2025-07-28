@@ -11,7 +11,7 @@ import {
   SidebarFooter
 } from "@/components/ui/sidebar";
 import { Link } from "react-router";
-import { Users, FileCheck , LayoutDashboard } from "lucide-react";
+import { Users, FileCheck , LayoutDashboard, MapPin } from "lucide-react";
 import { UserProfile } from "./UserProfile";
 
 export default function SideBar({ isAdmin , user }) {
@@ -25,7 +25,7 @@ export default function SideBar({ isAdmin , user }) {
       <SidebarContent >
         <SidebarGroup>
           <SidebarMenuButton asChild>
-            <Link>
+            <Link to="/admin/dashboard">
               <LayoutDashboard />
               <span>DashBoard</span>
             </Link>
@@ -66,12 +66,25 @@ export default function SideBar({ isAdmin , user }) {
                   </SidebarMenuItem>
                 </SidebarMenu>
               </SidebarGroupContent>
+              <SidebarGroupLabel >Location Management</SidebarGroupLabel>
+              <SidebarGroupContent >
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link to="/admin/locations">
+                        <MapPin />
+                        <span>Locations</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
             </>
           )}
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter >
-        <UserProfile user={ user }/>
+        <UserProfile />
       </SidebarFooter>
     </Sidebar>
   );

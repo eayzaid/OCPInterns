@@ -154,13 +154,126 @@ const deleteMentorFromLocation = async (mentorId) => {
     }
 }
 
+const updateLocation = async (departmentName, updateData) => {
+    try {
+        const updatedLocation = await LocationModel.findOneAndUpdate(
+            { departmentName },
+            { $set: updateData },
+            { new: true, runValidators: true }
+        );
+        if (!updatedLocation) {
+            const error = new Error("Location not found.");
+            error.statusCode = 404;
+            throw error;
+        }
+        return updatedLocation;
+    } catch (error) {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+            error.message = "Could not update the location.";
+        }
+        throw error;
+    }
+};
+
+const deleteLocationByDepartmentName = async (departmentName) => {
+    try {
+        const deletedLocation = await LocationModel.findOneAndDelete({ departmentName });
+        if (!deletedLocation) {
+            const error = new Error("Location not found.");
+            error.statusCode = 404;
+            throw error;
+        }
+        return deletedLocation;
+    } catch (error) {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+            error.message = "Could not delete the location.";
+        }
+        throw error;
+    }
+};
+
+async function aggregateLocations(stages) {
+  try {
+    const documents = await LocationModel.aggregate(stages);
+    return documents;
+  } catch (error) {
+    error.statusCode = 500;
+    throw error;
+  }
+}
+
+const searchLocations = async (queryParams, projection = {}) => {
+    try {
+        const { 
+            departmentName, 
+            subDepartment, 
+            mentorName, 
+            hasmentors,
+            search 
+        } = queryParams;
+
+        let query = {};
+
+        // Build database query based on parameters
+        if (departmentName) {
+            query.departmentName = { $regex: departmentName, $options: 'i' };
+        }
+
+        if (subDepartment) {
+            query.sousDepartments = { $regex: subDepartment, $options: 'i' };
+        }
+
+        if (mentorName) {
+            query.$or = [
+                { "mentors.firstName": { $regex: mentorName, $options: 'i' } },
+                { "mentors.lastName": { $regex: mentorName, $options: 'i' } },
+                { "mentors.mentorFullName": { $regex: mentorName, $options: 'i' } }
+            ];
+        }
+
+        if (hasmentors !== undefined) {
+            if (hasmentors === 'true') {
+                query["mentors.0"] = { $exists: true };
+            } else if (hasmentors === 'false') {
+                query.mentors = { $size: 0 };
+            }
+        }
+
+        // General search across multiple fields
+        if (search) {
+            query.$or = [
+                { departmentName: { $regex: search, $options: 'i' } },
+                { sousDepartments: { $regex: search, $options: 'i' } },
+                { "mentors.firstName": { $regex: search, $options: 'i' } },
+                { "mentors.lastName": { $regex: search, $options: 'i' } },
+                { "mentors.mentorFullName": { $regex: search, $options: 'i' } }
+            ];
+        }
+
+        const locations = await LocationModel.find(query, projection);
+        return locations;
+    } catch (error) {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+            error.message = "Could not search locations.";
+        }
+        throw error;
+    }
+};
+
 module.exports = {
+    aggregateLocations,
     deleteMentorFromLocation,
     createLocation,
     getAllLocations,
     getLocationById,
     getLocationByDepartmentName,
     addMentorToLocation,
+    updateLocation,
     deleteLocation,
-    getLocationsByQuery
+    deleteLocationByDepartmentName,
+    getLocationsByQuery,
+    searchLocations
 };

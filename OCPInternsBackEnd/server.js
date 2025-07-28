@@ -2,6 +2,7 @@ const express = require("express");
 const userManager = require("./Routes/UserManager/UserManager.js"); 
 const applicationManager = require("./Routes/ApplicationManager/ApplicationManager.js")
 const locationManager = require("./Routes/LocationManager.js")
+const dashboardManager = require("./Routes/Dashboard/DashboardManager.js")
 const errorHandler = require("./GlobalMiddleware/ErrorHandler.js")
 const cookieParser = require("cookie-parser");
 const cors = require("cors")
@@ -28,6 +29,7 @@ app.use(cookieParser());
 app.use("/user", userManager);
 app.use("/application" , applicationManager)
 app.use("/location" , locationManager)
+app.use("/dashboard" , dashboardManager)
 
 
 

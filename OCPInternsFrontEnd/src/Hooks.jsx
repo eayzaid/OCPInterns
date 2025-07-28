@@ -75,24 +75,24 @@ export function AuthProvider({ context, children }) {
   });
   const [fullName, setFullName] = useState("");
   let intervalId = null;
+  let isRefreshing = false;
 
   //intercept request going without authorization headers
   axios.interceptors.request.use(
     async (config) => {
       // Only set Authorization header if accessToken.authorization exists and is not empty
       if (!config.headers.Authorization) {
-
         //if the in-memory token is not empty
         if (accessToken.authorization) {
           config.headers.Authorization = accessToken.authorization;
-        } 
+        }
 
         //acces token to be fetched
-        else {
+        else if (!isRefreshing) {
           clearInterval(intervalId);
-
+          isRefreshing = true;
           const newAccessToken = await getAccessToken();
-
+          isRefreshing = false;
           //this responsable for refreshing the token every 10
           intervalId = setInterval(async () => {
             const newAccessToken = await getAccessToken();

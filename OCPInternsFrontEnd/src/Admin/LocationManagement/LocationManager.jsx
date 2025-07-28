@@ -1,23 +1,23 @@
+import React, { useState, useEffect } from "react";
+import { toast } from "sonner";
 import { Button } from "../../Components/ui/button";
-import { CirclePlus } from "lucide-react";
 import { Input } from "../../Components/ui/input";
 import {
   Select,
   SelectContent,
+  SelectItem,
   SelectTrigger,
   SelectValue,
-  SelectItem,
-} from "@/components/ui/select";
-import { useState } from "react";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import AddEditRecruiter from "./AddEditRecruiter";
-import RecruiterCard from "./RecruiterCard";
-import { fetchFilteredRecruiters } from "./Fetch";
-import { toast } from "sonner";
+} from "../../Components/ui/select";
+import { Dialog, DialogTrigger } from "../../Components/ui/dialog";
+import { CirclePlus, RefreshCw } from "lucide-react";
+import LocationCard from "./LocationCard";
+import AddEditLocation from "./AddEditLocation";
+import { getFilteredLocations, deleteLocation } from "./Fetch";
 
 const filterOptions = [
-  { value: "fullName", label: "Full Name" },
-  { value: "email", label: "Email" },
+  { value: "departmentName", label: "Department Name" },
+  { value: "subDepartment", label: "Sub-department" },
 ];
 
 const SelectField = ({
@@ -45,9 +45,12 @@ const SelectField = ({
 };
 
 const SearchInput = ({ searchState, onInputChange, onKeyPress }) => {
-  const placeholder = searchState.option === "fullName" 
-    ? "Recruiter's Full Name" 
-    : "Recruiter's Email";
+  let placeholder = "Search locations...";
+  if (searchState.option === "departmentName") {
+    placeholder = "Department Name";
+  } else if (searchState.option === "subDepartment") {
+    placeholder = "Sub-department Name";
+  }
 
   return (
     <Input
@@ -102,59 +105,70 @@ const SearchControls = ({
   </div>
 );
 
-const EmptyState = ({ hasSearched }) => (
+const EmptyState = ({ hasSearched, onAddLocation }) => (
   <div className="col-span-full flex flex-col justify-center items-center h-64">
     <h1 className="text-2xl font-bigtitle text-green-800 mb-2">
-      {hasSearched ? "No recruiters found" : "Start Your Search"}
+      {hasSearched ? "No locations found" : "Start Your Search"}
     </h1>
-    {!hasSearched && (
+    {!hasSearched ? (
       <p className="text-gray-600 text-center">
-        Enter search criteria and click "Search" to find recruiters
+        Enter search criteria and click "Search" to find locations
+      </p>
+    ) : (
+      <p className="text-gray-600 text-center mb-4">
+        Try adjusting your search criteria
       </p>
     )}
   </div>
 );
 
-export default function RecruiterManager() {
+const LocationManager = () => {
   const [searchState, setSearchState] = useState({
-    option: "fullName",
+    option: "departmentName",
     value: "",
     isLoading: false,
     hasSearched: false,
   });
 
-  const [recruiters, setRecruiters] = useState([]);
+  const [locations, setLocations] = useState([]);
   const [dialogState, setDialogState] = useState({
     isOpen: false,
-    selectedRecruiter: null,
+    selectedLocation: null,
   });
 
-  // Handle search/filter functionality
+  // Remove the initial fetch - let users search instead
+  // useEffect(() => {
+  //   handleSearch(true);
+  // }, []);
   const handleSearch = async () => {
-    if (!searchState.value.trim() && searchState.option !== "fullName") return;
+    if (!searchState.value.trim()) return; // Don't search if empty
     
     setSearchState(prev => ({ ...prev, isLoading: true }));
     
     try {
       const response = await toast.promise(
-        fetchFilteredRecruiters(searchState.option, searchState.value),
+        getFilteredLocations( 
+          (searchState.option === "departmentName" ? searchState.value : null),
+          (searchState.option !== "departmentName" ? searchState.value : null)
+        ),
         {
-          loading: "Searching recruiters...",
+          loading: "Searching locations...",
           success: (res) => {
-            if (res.status === 200) {
-              setRecruiters(res.data);
-              setSearchState(prev => ({ 
-                ...prev, 
-                isLoading: false, 
-                hasSearched: true 
-              }));
-              return `Found ${res.data.length} recruiter(s)`;
-            }
-            throw new Error("Failed to search recruiters");
+            const filtered = res.locations || [];
+            
+            setLocations(filtered);
+            setSearchState(prev => ({ 
+              ...prev, 
+              isLoading: false, 
+              hasSearched: true 
+            }));
+            
+            return `Found ${filtered.length} location(s)`;
           },
           error: () => {
             setSearchState(prev => ({ ...prev, isLoading: false }));
-            return "Failed to search recruiters";
+            setLocations([]);
+            return "Failed to search locations";
           }
         }
       );
@@ -163,58 +177,65 @@ export default function RecruiterManager() {
     }
   };
 
-  // Clear search and reset state
   const handleClearSearch = () => {
     setSearchState({
-      option: "fullName",
+      option: "departmentName",
       value: "",
       isLoading: false,
       hasSearched: false,
     });
-    setRecruiters([]);
+    setLocations([]); // Clear locations when clearing search
   };
 
-  // Handle input changes
   const handleInputChange = (value) => {
     setSearchState(prev => ({ ...prev, value }));
   };
 
-  // Handle filter option change
   const handleFilterChange = (option) => {
     setSearchState(prev => ({ option, value: "", isLoading: false, hasSearched: prev.hasSearched }));
   };
 
-  // Dialog management
-  const handleEditRecruiter = (recruiter) => {
-    setDialogState({ isOpen: true, selectedRecruiter: recruiter });
+  const handleEditLocation = (location) => {
+    setDialogState({ isOpen: true, selectedLocation: location });
   };
 
-  const handleAddRecruiter = () => {
-    setDialogState({ isOpen: true, selectedRecruiter: null });
+  const handleAddLocation = () => {
+    setDialogState({ isOpen: true, selectedLocation: null });
   };
 
   const handleCloseDialog = () => {
-    setDialogState({ isOpen: false, selectedRecruiter: null });
+    setDialogState({ isOpen: false, selectedLocation: null });
   };
 
-  // Handle recruiter updates (add/edit)
-  const handleRecruiterUpdated = (updatedRecruiter, isNew = false) => {
+  const handleLocationUpdated = (updatedLocation, isNew = false) => {
     if (isNew) {
-      setRecruiters(prev => [...prev, updatedRecruiter]);
+      setLocations(prev => [...prev, updatedLocation]);
     } else {
-      setRecruiters(prev => 
-        prev.map(r => r.userId === updatedRecruiter.userId ? updatedRecruiter : r)
+      setLocations(prev => 
+        prev.map(loc => loc.departmentName === updatedLocation.departmentName ? updatedLocation : loc)
       );
     }
     handleCloseDialog();
   };
 
-  // Handle recruiter deletion
-  const handleRecruiterDeleted = (deletedUserId) => {
-    setRecruiters(prev => prev.filter(r => r.userId !== deletedUserId));
+  const handleDeleteLocation = (departmentName) => {
+    try {
+    toast.promise(
+        deleteLocation(departmentName),
+        {
+          loading: "Deleting location...",
+          success: () => {
+            setLocations(prev => prev.filter(loc => loc.departmentName !== departmentName));
+            return "Location deleted successfully!";
+          },
+          error: (error) => error.message || "Failed to delete location",
+        }
+      );
+    } catch (error) {
+      console.error("Error deleting location:", error);
+    }
   };
 
-  // Handle keyboard events
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
       handleSearch();
@@ -224,31 +245,33 @@ export default function RecruiterManager() {
   return (
     <div className="bg-green-100 h-full p-4">
       <h1 className="text-5xl font-bigtitle text-green-800">
-        Recruiter Management
+        Location Management
       </h1>
       <p className="text-xl font-casualfont text-gray-500">
-        Manage recruiters, track their profiles, and oversee recruitment activities
+        Manage departments, sub-departments, and mentor assignments
       </p>
       
       <div className="flex flex-col justify-center items-center w-full mt-3">
         <div className="flex justify-between bg-emerald-600 w-9/10 p-4">
           <h1 className="font-casualfont font-bold text-4xl text-white">
-            Recruiters
+            Locations
           </h1>
           <Dialog open={dialogState.isOpen} onOpenChange={(open) => !open && handleCloseDialog()}>
             <DialogTrigger asChild>
               <Button 
                 variant="secondary" 
                 className="text-emerald-600"
-                onClick={handleAddRecruiter}
+                onClick={handleAddLocation}
               >
                 <CirclePlus />
-                Add a Recruiter
+                Add a Location
               </Button>
             </DialogTrigger>
-            <AddEditRecruiter 
-              recruiter={dialogState.selectedRecruiter} 
-              onSuccess={handleRecruiterUpdated}
+            <AddEditLocation 
+              location={dialogState.selectedLocation} 
+              onLocationSaved={(location) => handleLocationUpdated(location, !dialogState.selectedLocation)}
+              isOpen={dialogState.isOpen}
+              onClose={handleCloseDialog}
             />
           </Dialog>
         </div>
@@ -258,31 +281,32 @@ export default function RecruiterManager() {
             searchState={searchState}
             onInputChange={handleInputChange}
             onFilterChange={handleFilterChange}
-            onSearch={handleSearch}
+            onSearch={() => handleSearch()}
             onClear={handleClearSearch}
             onKeyPress={handleKeyPress}
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 place-self-center auto-rows-fr">
             {!searchState.hasSearched ? (
-              <EmptyState hasSearched={false} />
-            ) : recruiters.length > 0 ? (
-              recruiters.map((recruiter) => (
-                <RecruiterCard
-                  key={recruiter.userId}
-                  recruiter={recruiter}
-                  onEdit={handleEditRecruiter}
-                  onDelete={() => handleRecruiterDeleted(recruiter.userId)}
+              <EmptyState hasSearched={false} onAddLocation={handleAddLocation} />
+            ) : locations.length > 0 ? (
+              locations.map((location) => (
+                <LocationCard
+                  key={location._id}
+                  location={location}
+                  onEdit={handleEditLocation}
+                  onDelete={handleDeleteLocation}
                 />
               ))
             ) : (
-              <EmptyState hasSearched={true} />
+              <EmptyState hasSearched={true} onAddLocation={handleAddLocation} />
             )}
           </div>
         </div>
       </div>
     </div>
   );
-}
+};
 
-export { SelectField };
+export default LocationManager;
+    

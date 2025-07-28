@@ -136,7 +136,7 @@ const applicationSchema = MongoClient.Schema({
       validator: function (value) {
         return !this.startDate || !value || value >= this.startDate;
       },
-      message: 'End date must be after or equal to start date'
+      message: "End date must be after or equal to start date",
     },
   },
 });
@@ -225,6 +225,7 @@ async function findAppliactionByUserId(userId, projection) {
   }
 }
 
+//this is used to get application for their review
 async function getApplications(page, pageSize) {
   try {
     const documents = await ApplicationModel.aggregate([
@@ -277,7 +278,18 @@ async function getApplications(page, pageSize) {
   }
 }
 
+async function aggregateApplications(stages) {
+  try {
+    const documents = await ApplicationModel.aggregate(stages);
+    return documents;
+  } catch (error) {
+    error.statusCode = 500;
+    throw error;
+  }
+}
+
 module.exports = {
+  aggregateApplications,
   getApplications,
   addApplication,
   updateApplication,

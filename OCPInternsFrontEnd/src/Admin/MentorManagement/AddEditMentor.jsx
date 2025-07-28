@@ -17,7 +17,7 @@ import { Badge } from "../../Components/ui/badge";
 import { Label } from "../../Components/ui/label";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { fetchUser, register, updateMentor } from "./Fetch";
+import { fetchUser, register, updateMentor } from "./Fetch.js";
 import { toast } from "sonner";
 
 //registration when no mentor have been passed , an edit when the mentor have been passed as a prop
@@ -168,6 +168,15 @@ export default function AddEditMentor({ mentor, departments, onEditing }) {
             fieldName="confirmPassword"
             type="password"
           />
+          {mentor && (
+            <div className="w-full p-2 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-700">
+              <Label className="font-medium">Note:</Label>
+              <p>
+                Leave password fields empty to keep the current password
+                unchanged.
+              </p>
+            </div>
+          )}
           <SelectForm
             control={formObject.control}
             placeholder="Select Department"

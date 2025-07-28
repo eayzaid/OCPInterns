@@ -4,8 +4,11 @@ import { Routes, Route } from "react-router";
 import ApplicationManager from "../SharedPages/ApplicationManager/ApplicationManager";
 import MentorManager from "./MentorManagement/MentorManager";
 import RecruiterManager from "./RecruiterManagement/RecruiterManager";
+import LocationManager from "./LocationManagement/LocationManager";
+import DashBoard from "../SharedPages/Dashboard/DashBoard";
 
 export default function AdminPage() {
+  
   return (
     <SidebarProvider className="flex">
       <SideBar isAdmin={true} />
@@ -17,6 +20,8 @@ export default function AdminPage() {
           <Route path="/applications" element={<ApplicationManager />} />
           <Route path="/mentors" element={<MentorManager />} />
           <Route path="/recruiters" element={<RecruiterManager />} />
+          <Route path="/locations" element={<LocationManager />} />
+          <Route path="/dashboard" element={<DashBoard />} />
         </Routes>
       </main>
     </SidebarProvider>

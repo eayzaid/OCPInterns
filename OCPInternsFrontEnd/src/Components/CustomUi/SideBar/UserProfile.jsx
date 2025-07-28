@@ -16,9 +16,39 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useEffect } from "react";
+import { useState } from "react";
+import { useAuth } from "../../../Hooks";
+import { initUser } from "../../../Fetch";
+import { useNavigate } from "react-router";
+import { toUpperCase } from "zod";
 
-export function UserProfile(user) {
+export function UserProfile() {
   const { isMobile } = useSidebar();
+  const [ user , setUser ] = useState({})
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogOut = async ()=>{
+    await logout();
+    navigate("/auth")
+  }
+
+  const getInitials = (fullName) => {
+    if (!fullName) return "CN"; // Fallback if no name
+    return fullName.split(" ")
+      .reduce((acc, name) => acc + name[0].toUpperCase(), "")
+      .slice(0, 2); // Limit to 2 characters for better display
+  };
+
+  useEffect(()=>{
+    const fetchUser = async()=>{
+      const response = await initUser();
+      setUser(response.data);
+    }
+    console.log("itshoudstart")
+    fetchUser();
+  },[])
 
   return (
     <SidebarMenu>
@@ -30,11 +60,11 @@ export function UserProfile(user) {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg grayscale">
-                <AvatarImage src={user.avatar} alt={user.name} />
+                <AvatarImage src={user.avatar} alt={user.fullName} />
                 <AvatarFallback className="rounded-lg">CN</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name}</span>
+                <span className="truncate font-medium">{user.fullName}</span>
                 <span className="text-muted-foreground truncate text-xs">
                   {user.email}
                 </span>
@@ -51,11 +81,11 @@ export function UserProfile(user) {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  <AvatarImage src={user.avatar} alt={user.fullName} />
+                  <AvatarFallback className="rounded-lg">{getInitials(user.fullName)}</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name}</span>
+                  <span className="truncate font-medium">{user.fullName}</span>
                   <span className="text-muted-foreground truncate text-xs">
                     {user.email}
                   </span>
@@ -70,7 +100,7 @@ export function UserProfile(user) {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="bg-red-400 hover:bg-red-700">
+            <DropdownMenuItem onClick={()=>handleLogOut()} className="bg-red-400 hover:bg-red-700">
               <LogOut /> Log out
             </DropdownMenuItem>
           </DropdownMenuContent>
