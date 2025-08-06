@@ -5,9 +5,8 @@ import { SelectForm } from "../../Components/CustomUi/Inputs"
 import { InternshipDurations , InternshipTypesFrancophone , OCPMajorFields } from "../../../Data"
 import { GeneralInfoschemaValidation } from "../../FormSchemaValidation"
 import { useEffect , useState } from "react"
-import { da } from "date-fns/locale/da"
 
-export default function GeneralInfo( { isValid , onAction , setGeneralInfo }){
+export default function GeneralInfo( { setIsValid , onAction , setGeneralInfo }){
 
     const [ load , setLoad ] = useState(false)
 
@@ -16,10 +15,9 @@ export default function GeneralInfo( { isValid , onAction , setGeneralInfo }){
     })
 
     const onSubmit = ( data ) =>{
-        isValid = true;
-        console.log(data);
         setGeneralInfo( data )
-        setTimeout(()=> isValid = false , 500) //to remove the valid flag after 500ms 
+        setIsValid(true);
+        setTimeout(()=> setIsValid(false) , 500) //to remove the valid flag after 500ms 
     }
 
     useEffect(()=>{

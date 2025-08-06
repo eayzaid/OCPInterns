@@ -27,7 +27,11 @@ router.get("/count", async (req, res, next) => {
     ];
 
     const document = await applicationsHandler.aggregateApplications(stages);
+    req.dataToCache = {
+      value: document[0],
+    };
     res.status(200).json(document[0]);
+    next();
   } catch (error) {
     next(error);
   }
@@ -53,7 +57,11 @@ router.get("/status", async (req, res, next) => {
     ];
 
     const document = await applicationsHandler.aggregateApplications(stages);
+    req.dataToCache = {
+      value: document,
+    };
     res.status(200).json(document);
+    next();
   } catch (error) {
     next(error);
   }
@@ -80,13 +88,17 @@ router.get("/interntype", async (req, res, next) => {
           _id: 0,
           internType: "$_id.internType",
           countAccepted: 1,
-          countTotal: 1
+          countTotal: 1,
         },
       },
     ];
 
     const document = await applicationsHandler.aggregateApplications(stages);
+    req.dataToCache = {
+      value: document,
+    };
     res.status(200).json(document);
+    next();
   } catch (error) {
     next(error);
   }
@@ -96,29 +108,33 @@ router.get("/interntype", async (req, res, next) => {
 router.get("/internduration", async (req, res, next) => {
   try {
     const stages = [
-        {
-            $group: {
-                _id: "$generalInfo.internDuration",
-                countAccepted: {
-                    $sum: {
-                        $cond: [{ $eq: ["$status", "accepted"] }, 1, 0]
-                    }
-                },
-                countTotal: { $sum: 1 }
-            }
+      {
+        $group: {
+          _id: "$generalInfo.internDuration",
+          countAccepted: {
+            $sum: {
+              $cond: [{ $eq: ["$status", "accepted"] }, 1, 0],
+            },
+          },
+          countTotal: { $sum: 1 },
         },
-        {
-            $project: {
-                _id: 0,
-                internDuration: "$_id",
-                countAccepted: 1,
-                countTotal: 1
-            }
-        }
+      },
+      {
+        $project: {
+          _id: 0,
+          internDuration: "$_id",
+          countAccepted: 1,
+          countTotal: 1,
+        },
+      },
     ];
 
     const document = await applicationsHandler.aggregateApplications(stages);
+    req.dataToCache = {
+      value: document,
+    };
     res.status(200).json(document);
+    next();
   } catch (error) {
     next(error);
   }
@@ -130,7 +146,7 @@ router.get("/internfield", async (req, res, next) => {
     const stages = [
       {
         $group: {
-          _id: { internField: "$generalInfo.internField"},
+          _id: { internField: "$generalInfo.internField" },
           countAccepted: {
             $sum: {
               $cond: [{ $eq: ["$status", "accepted"] }, 1, 0],
@@ -143,14 +159,19 @@ router.get("/internfield", async (req, res, next) => {
         $project: {
           _id: 0,
           internField: "$_id.internField",
-          countAccepted :1 ,
+          countAccepted: 1,
           countTotal: 1,
         },
       },
     ];
 
-    const document = await applicationsHandler.aggregateApplications(stages);   
+    const document = await applicationsHandler.aggregateApplications(stages);
+
+    req.dataToCache = {
+      value: document,
+    };
     res.status(200).json(document);
+    next();
   } catch (error) {
     next(error);
   }
@@ -160,28 +181,28 @@ router.get("/internfield", async (req, res, next) => {
 router.get("/submissions", async (req, res, next) => {
   try {
     const now = new Date();
-    const threeMonthsAgo = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
-    
+    const threeMonthsAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
     const stages = [
       {
         $addFields: {
-          createdAt: { $toDate: "$createdAt" }
-        }
+          createdAt: { $toDate: "$createdAt" },
+        },
       },
       {
         $match: {
-          createdAt: { $gte: threeMonthsAgo }
-        }
+          createdAt: { $gte: threeMonthsAgo },
+        },
       },
       {
         $group: {
           _id: {
             year: { $year: "$createdAt" },
             month: { $month: "$createdAt" },
-            day: { $dayOfMonth: "$createdAt" }
+            day: { $dayOfMonth: "$createdAt" },
           },
-          submissions: { $sum: 1 }
-        }
+          submissions: { $sum: 1 },
+        },
       },
       {
         $project: {
@@ -190,24 +211,30 @@ router.get("/submissions", async (req, res, next) => {
             $dateFromParts: {
               year: "$_id.year",
               month: "$_id.month",
-              day: "$_id.day"
-            }
+              day: "$_id.day",
+            },
           },
-          submissions: 1
-        }
+          submissions: 1,
+        },
       },
       {
         $addFields: {
-          date: { $dateToString: { format: "%Y-%m-%d", date: "$date" } }
-        }
+          date: { $dateToString: { format: "%Y-%m-%d", date: "$date" } },
+        },
       },
       {
-        $sort: { date: 1 }
-      }
+        $sort: { date: 1 },
+      },
     ];
 
     const document = await applicationsHandler.aggregateApplications(stages);
+
+    req.dataToCache = {
+      value: document,
+    };
+
     res.status(200).json(document);
+    next();
   } catch (error) {
     next(error);
   }

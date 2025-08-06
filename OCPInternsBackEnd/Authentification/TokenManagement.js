@@ -108,6 +108,7 @@ async function grantAnotherTokens(refreshToken) {
         refreshToken
       ),
       accessToken: createAccessToken(decodedInfo.userId, decodedInfo.role),
+      role : decodedInfo.role
     };
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
@@ -138,7 +139,7 @@ async function deleteAllTokens(refreshToken) {
   }
 }
 module.exports = {
-    deleteAllTokens,
+  deleteAllTokens,
   grantNewTokens,
   grantAnotherTokens,
   verifyAndDecodeAccessToken,

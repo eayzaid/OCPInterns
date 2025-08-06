@@ -11,22 +11,45 @@ import {
 } from "./Fetch";
 
 export default function ApplicationManager() {
-  const [page, setPage] = useState(1);
+  const [paginationMetaData, setPaginationMetaData] = useState({
+    page: 1,
+    totalPages: null,
+  });
   const [applications, setApplications] = useState([]);
   const [application, setApplication] = useState(undefined);
-  const [locations, setLocations] = useState([]);
+  const [locations, setLocations] = useState(null);
   const { accessToken } = useAuth();
 
   useEffect(() => {
     //intial fetching of applications , locations
     const fetchData = async () => {
-      const newApplications = await fetchApplications(accessToken, page);
-      const locations = await fetchLocations(accessToken);
-      setApplications([...applications, ...newApplications]);
-      setLocations(locations);
+      try {
+        const newApplicationsPromise = fetchApplications(
+          accessToken,
+          paginationMetaData.page
+        );
+        
+        //fetch only if location is null
+        if (!locations) {
+          const locationsPromise = fetchLocations(accessToken);
+          setLocations(await locationsPromise);
+        }
+        
+        const newApplications = await newApplicationsPromise;
+        setApplications(newApplications.applications);
+        
+        // Update totalPages separately to avoid infinite loop
+        if (newApplications.totalPages !== paginationMetaData.totalPages) {
+          setPaginationMetaData(prev => ({
+            ...prev,
+            totalPages: newApplications.totalPages,
+          }));
+        }
+      } catch (error) {
+      }
     };
     fetchData();
-  }, []);
+  }, [paginationMetaData.page, accessToken]); // Added accessToken to dependencies
 
   const onSelectCandiate = async (applicationId) => {
     if (!application || applicationId !== application.applicationId) {
@@ -39,16 +62,20 @@ export default function ApplicationManager() {
   };
 
   //update the application method
-  const onUpdate = async (updatedShard , originalApplication) => {
+  const onUpdate = async (updatedShard, originalApplication) => {
     let updatedDocument = null;
-    
+
     //check if the application was accepted and then rejected ( avoiding updating the database with unmeaningful data according to context)
-    //like previous (mentor , departement) in case of status that's not accepted 
-    if(updatedShard.status !== "accepted" && originalApplication.status === "accepted"){
-      const { mentor , startDate , endDate , department , ...neededPart } = originalApplication;
-      updatedDocument = { ...neededPart , status : updatedShard.status } 
-    }else{
-      updatedDocument = { ...originalApplication, ...updatedShard }
+    //like previous (mentor , departement) in case of status that's not accepted
+    if (
+      updatedShard.status !== "accepted" &&
+      originalApplication.status === "accepted"
+    ) {
+      const { mentor, startDate, endDate, department, ...neededPart } =
+        originalApplication;
+      updatedDocument = { ...neededPart, status: updatedShard.status };
+    } else {
+      updatedDocument = { ...originalApplication, ...updatedShard };
     }
     const response = await updateApplication(
       accessToken,
@@ -57,12 +84,12 @@ export default function ApplicationManager() {
     );
     if (response.status !== 200) {
       alert("update document wasn't succesfull");
-    }else{
+    } else {
       //update the applicaton overview in the table ( changing the status only )
-      setApplications(prev =>
-        prev.map(app =>
+      setApplications((prev) =>
+        prev.map((app) =>
           app.applicationId === originalApplication.applicationId
-            ? {...app , status : updatedShard.status}
+            ? { ...app, status: updatedShard.status }
             : app
         )
       );
@@ -78,7 +105,12 @@ export default function ApplicationManager() {
       >
         <div className="xl:flex-3 ">
           <ApplicationTable
+            setPage={(value) =>
+              setPaginationMetaData(prev => ({ ...prev, page: value }))
+            }
+            {...paginationMetaData}
             applications={applications}
+            onSet={setApplications}
             onSelect={onSelectCandiate}
           />
         </div>
@@ -91,7 +123,9 @@ export default function ApplicationManager() {
           locations={locations}
           application={application}
           internshipGeneralInfo={application && application.generalInfo}
-          onUpdate={ (updatedApplication) => onUpdate(updatedApplication , application) }
+          onUpdate={(updatedApplication) =>
+            onUpdate(updatedApplication, application)
+          }
         />
       </div>
     </div>

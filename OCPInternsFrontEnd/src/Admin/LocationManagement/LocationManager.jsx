@@ -173,7 +173,6 @@ const LocationManager = () => {
         }
       );
     } catch (error) {
-      console.error("Search error:", error);
     }
   };
 
@@ -232,7 +231,6 @@ const LocationManager = () => {
         }
       );
     } catch (error) {
-      console.error("Error deleting location:", error);
     }
   };
 

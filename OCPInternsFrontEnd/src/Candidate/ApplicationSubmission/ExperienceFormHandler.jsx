@@ -26,7 +26,6 @@ export default function ExperienceForm({ experience, addApplication, deleteAppli
         if (addApplication) {
             addApplication(data);
         }
-        console.log(data);
         
         // Reset the form if it's not an edit operation (no existing experience)
         if (!experience) {

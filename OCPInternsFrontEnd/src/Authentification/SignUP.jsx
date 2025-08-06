@@ -20,7 +20,6 @@ export default function SignUP ( {setIsLogin} ){
         const { confirmPassword, ...registerData } = data;
         try{
             await register(registerData);
-            console.log("let's gooo")
             navigate('/candidate'); //to navigate to the landing page of candidates
         }catch(error){
         }

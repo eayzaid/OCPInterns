@@ -24,7 +24,6 @@ export default function LanguageForm({ language, addApplication, deleteApplicati
         if (addApplication) {
             addApplication(data);
         }
-        console.log(data);
         
         // Reset the form if it's not an edit operation
         if (!language) {

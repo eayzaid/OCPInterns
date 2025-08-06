@@ -18,7 +18,6 @@ export default function TwoStatePieChart({
   const [chartData, setChartData] = useState(null);
   const label = useRef(null);
   const chartConfig = useRef({});
-  console.log(chartConfig);
   const initChart = (data) => {
     chartConfig.current = {};
     const color = Color(chartColor || "rgb(139, 190, 252)");

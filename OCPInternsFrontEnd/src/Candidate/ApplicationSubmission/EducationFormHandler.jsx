@@ -29,7 +29,6 @@ export default function EducationForm({ education , addApplication , deleteAppli
 
     const onSubmit = ( data )=>{
         addApplication(data);
-        console.log(data);
         
         // Reset the form if it's not an edit operation
         if (!education) {

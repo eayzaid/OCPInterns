@@ -16,6 +16,16 @@ export async function fetchApplications( accessToken , page ){
     }
 }
 
+export async function fetchApplicationsByFullName( fullName  ){
+    try{
+        const response = await axios.get(`${apiURL}/application/view?fullName=${fullName}`);
+        return response.data;
+    }catch(error){
+        if(error.response) return error.response
+        else throw error;
+    }
+}
+
 export async function fetchApplication( accessToken , applicationId ){
     try{
         const response = await axios.get(`${apiURL}/application/view/${applicationId}`,{
@@ -57,3 +67,5 @@ export async function updateApplication ( accessToken , applicationId , updatedA
         else throw error;
     }
 }
+
+

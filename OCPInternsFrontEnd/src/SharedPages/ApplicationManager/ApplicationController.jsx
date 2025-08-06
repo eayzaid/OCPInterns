@@ -104,7 +104,7 @@ export default function ApplicationController({
       mentors: [],
     };
     if (department) {
-      const foundDepartment = locations.find(
+      const foundDepartment = locations?.find(
         (loc) => loc.departmentName === department
       );
       if (foundDepartment) {
@@ -199,9 +199,9 @@ export default function ApplicationController({
                     control={formObject.control}
                     fieldName="department.name"
                     fieldLabel="Department"
-                    selectItems={locations.map((element) => {
+                    selectItems={locations ? locations.map((element) => {
                       if (element) return element.departmentName;
-                    })}
+                    }) : []}
                     isDisabled={isDisabled}
                     className="w-full border-1 border-green-950"
                   />

@@ -8,21 +8,25 @@ router.get("/mentorship", async (req, res, next) => {
       {
         $set: {
           totalMentors: { $size: { $ifNull: ["$mentors", []] } },
-          totalMentees: { $sum: "$mentors.menteeCount" }
-        }
+          totalMentees: { $sum: "$mentors.menteeCount" },
+        },
       },
       {
         $project: {
           _id: 0,
           departmentName: 1,
           totalMentors: 1,
-          totalMentees: 1
+          totalMentees: 1,
         },
       },
     ];
 
     const document = await locationHandler.aggregateLocations(stages);
+    req.dataToCache = {
+      value: document,
+    };
     res.status(200).json(document);
+    next()
   } catch (error) {
     next(error);
   }

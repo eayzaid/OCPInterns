@@ -93,7 +93,6 @@ const AddEditLocation = ({ location, onLocationSaved }) => {
         },
       });
     } catch (error) {
-      console.error("Error saving location:", error);
     } finally {
       setIsLoading(false);
     }

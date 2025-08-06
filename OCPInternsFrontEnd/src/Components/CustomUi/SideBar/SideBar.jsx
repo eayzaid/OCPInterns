@@ -14,7 +14,7 @@ import { Link } from "react-router";
 import { Users, FileCheck , LayoutDashboard, MapPin } from "lucide-react";
 import { UserProfile } from "./UserProfile";
 
-export default function SideBar({ isAdmin , user }) {
+export default function SideBar({ isAdmin }) {
   return (
     <Sidebar>
         <SidebarHeader className="p-4 bg-emerald-600 w-full">
@@ -25,7 +25,7 @@ export default function SideBar({ isAdmin , user }) {
       <SidebarContent >
         <SidebarGroup>
           <SidebarMenuButton asChild>
-            <Link to="/admin/dashboard">
+            <Link to={isAdmin ? "/admin/dashboard" : "/recruiter/dashboard"}>
               <LayoutDashboard />
               <span>DashBoard</span>
             </Link>
@@ -35,7 +35,7 @@ export default function SideBar({ isAdmin , user }) {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <Link to="/admin/applications">
+                  <Link to={isAdmin ? "/admin/applications" : "/recruiter/applications"}>
                     <FileCheck />
                     <span>Application Management</span>
                   </Link>

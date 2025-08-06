@@ -40,6 +40,7 @@ async function refreshAccessToken(req, res, next) {
       });
       res.status(200).json({
         authorization: `Bearer ${newAuthToken.accessToken}`,
+        role : newAuthToken.role
       });
     } catch (error) {
       next(error);
@@ -68,6 +69,7 @@ async function userRegistration(req, res, next) {
       firstName: addedUser.firstName,
       lastName: addedUser.lastName,
       authorization: `Bearer ${newAuthToken.accessToken}`,
+      role : userRolefromPath
     });
   } catch (error) {
     next(error);
@@ -95,7 +97,8 @@ async function userAuthentification(req, res, next) {
         firstName: existingUser.firstName,
         lastName: existingUser.lastName,
         authorization: `Bearer ${newAuthToken.accessToken}`,
-        redirect : `/${userManager.getUserRole(userRole)}`
+        redirect : `/${userManager.getUserRole(userRole)}`,
+        role : userManager.getUserRole(userRole)
       });
     }
   } catch (error) {

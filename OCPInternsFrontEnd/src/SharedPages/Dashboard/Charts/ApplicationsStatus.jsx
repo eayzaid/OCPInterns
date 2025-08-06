@@ -36,7 +36,6 @@ export default function ApplicationsStatus() {
 
   const initChart = (data) => {
     data = data.map((element) => {
-      console.log(`var(--color-${element.status})`)
       return {
         ...element,
         fill: `var(--color-${element.status})`,

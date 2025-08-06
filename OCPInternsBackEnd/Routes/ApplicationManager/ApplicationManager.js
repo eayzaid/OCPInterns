@@ -4,8 +4,24 @@ const {
   authenticateToken,
 } = require("../../Authentification/UserAuthentification");
 const applicationManager = require("../../DatabasesHandlers/ApplicationManagement/ApplicationsHandler");
+const { findDownload } = require("../../DatabasesHandlers/DownloadsHandler")
 
 const router = express.Router();
+
+router.get("/verify/:documentID" , async ( req , res , next) =>{
+  try{
+    if(!req.params.documentID){
+      const error = new Error("Client sent a bad request");
+      error.statusCode = 400;
+      throw error;
+    }
+    const download = await findDownload(req.params.documentID);
+    res.status(200).json(download);
+  }catch(error){
+    next(error);
+  }
+})
+
 router.use(authenticateToken);
 router.use("/candidate", candidateApplicationManager);
 
@@ -19,18 +35,27 @@ router.use((req, res, next) => {
   next();
 });
 
+//this route is set to get applications by fullName ,or get paginated resulted in default
 router.get("/view", async (req, res, next) => {
   try {
-    let { page, limit } = req.query;
-    page = parseInt(page);
-    limit = parseInt(limit);
-    if (page >= 0 && limit > 0) {
-      const documents = await applicationManager.getApplications(page, limit);
-      res.status(200).json(documents.applications);
+    if (req.query.fullName) {
+      const fullName = req.query.fullName;
+      const applications = await applicationManager.findAppliactionByUFullName(
+        fullName
+      );
+      res.status(200).json(applications);
     } else {
-      const error = new Error("Invalid Parameters");
-      error.statusCode = 400;
-      throw error;
+      let { page, limit } = req.query;
+      page = parseInt(page) || 1 ;
+      limit = parseInt(limit) || 20;
+      if (page > 0 && limit > 0) {
+        const documents = await applicationManager.getApplications(page, limit);
+        res.status(200).json(documents);
+      } else {
+        const error = new Error("Invalid Parameters");
+        error.statusCode = 400;
+        throw error;
+      }
     }
   } catch (error) {
     if (!error.statusCode) error.statusCode = 500;
@@ -61,8 +86,11 @@ router.post("/update/:applicationId", async (req, res, next) => {
   try {
     const applicationId = req.params.applicationId;
     if (applicationId) {
-      const updatedApplication = req.body
-      await applicationManager.updateApplication(applicationId , updatedApplication);
+      const updatedApplication = req.body;
+      await applicationManager.updateApplication(
+        applicationId,
+        updatedApplication
+      );
       res.status(200).end();
     } else {
       const error = new Error("Invalid Parameters");
@@ -74,5 +102,6 @@ router.post("/update/:applicationId", async (req, res, next) => {
     next(error);
   }
 });
+
 
 module.exports = router;

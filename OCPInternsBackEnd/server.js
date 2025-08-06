@@ -33,7 +33,7 @@ app.use("/dashboard" , dashboardManager)
 
 
 
-//app.use(errorHandler)
+app.use(errorHandler)
 app.listen(PORT , async () => {
     await DataBase.establishConnection();
     console.log(`the server is now listening from port 8080`)

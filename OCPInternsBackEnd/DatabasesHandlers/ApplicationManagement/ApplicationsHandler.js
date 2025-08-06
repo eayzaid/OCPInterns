@@ -1,6 +1,7 @@
 const MongoClient = require("mongoose");
 const Data = require("../../Data");
 const { v4: uuidv4 } = require("uuid");
+const { application } = require("express");
 
 const applicationSchema = MongoClient.Schema({
   applicationId: {
@@ -225,13 +226,26 @@ async function findAppliactionByUserId(userId, projection) {
   }
 }
 
+async function findAppliactionByUFullName(fullName, projection) {
+  try {
+    const documents = await ApplicationModel.find(
+      { fullName: fullName },
+      projection || {}
+    );
+    return documents;
+  } catch (error) {
+    error.statusCode = 500;
+    throw error;
+  }
+}
+
 //this is used to get application for their review
 async function getApplications(page, pageSize) {
   try {
     const documents = await ApplicationModel.aggregate([
       {
         $facet: {
-          metadata: [{ $count: "applicationId" }],
+          metadata: [{ $count: "totalApplications" }],
           applications: [
             { $skip: (page - 1) * pageSize },
             { $limit: pageSize },
@@ -270,6 +284,13 @@ async function getApplications(page, pageSize) {
           ],
         },
       },
+      { $unwind: "$metadata" },
+      {
+        $project: {
+          applications: 1,
+          totalPages: { $ceil: { $divide: ["$metadata.totalApplications", pageSize] } },
+        },
+      },
     ]);
     return documents[0];
   } catch (error) {
@@ -289,6 +310,7 @@ async function aggregateApplications(stages) {
 }
 
 module.exports = {
+  findAppliactionByUFullName,
   aggregateApplications,
   getApplications,
   addApplication,

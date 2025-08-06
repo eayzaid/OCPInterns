@@ -1,6 +1,7 @@
 const express = require("express");
 const applicationManager = require("../../DatabasesHandlers/ApplicationManagement/ApplicationsHandler");
 const allApplicationManager = require("../../DatabasesHandlers/ApplicationManagement/AllApplicationsHandler");
+const { LetterCreator } = require("../../FileHandlerModule/LettreCreator");
 
 const router = express.Router();
 
@@ -38,7 +39,7 @@ router.get("/view", async (req, res, next) => {
       createdAt: 1,
       "generalInfo.internType": 1,
       status: 1,
-      _id: 0
+      _id: 0,
     };
 
     const oldApplications = await allApplicationManager.findAppliactions(
@@ -72,4 +73,41 @@ router.get("/eligible", async (req, res, next) => {
     next(error);
   }
 });
+
+router.get("/download/:applicationId", async (req, res, next) => {
+  try {
+    if (!req.params.applicationId) {
+      const error = new Error(
+        "Client sent an application download request without specifying it"
+      );
+      error.statusCode = 400;
+      throw error;
+    }
+    const application = await applicationManager.findAppliaction(
+      req.params.applicationId
+    );
+    if (!application) {
+      const error = new Error("Application Not found");
+      error.statusCode = 404;
+      throw error;
+    }
+    if (application.status !== "accepted") {
+      const error = new Error("the application requested was not accepted");
+      error.statusCode = 403;
+      throw error;
+    }
+    const pdf = await LetterCreator(application);
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename='Lettre de stage.pdf'"
+    );
+    res.status(200).send(
+     pdf
+    );
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;

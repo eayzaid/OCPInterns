@@ -21,7 +21,6 @@ import { useState } from "react";
 import { useAuth } from "../../../Hooks";
 import { initUser } from "../../../Fetch";
 import { useNavigate } from "react-router";
-import { toUpperCase } from "zod";
 
 export function UserProfile() {
   const { isMobile } = useSidebar();
@@ -61,7 +60,7 @@ export function UserProfile() {
             >
               <Avatar className="h-8 w-8 rounded-lg grayscale">
                 <AvatarImage src={user.avatar} alt={user.fullName} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <AvatarFallback className="rounded-lg">{getInitials(user.fullName)}</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.fullName}</span>
@@ -93,14 +92,7 @@ export function UserProfile() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <CircleUser />
-                Account
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={()=>handleLogOut()} className="bg-red-400 hover:bg-red-700">
+            <DropdownMenuItem onClick={()=>handleLogOut()}>
               <LogOut /> Log out
             </DropdownMenuItem>
           </DropdownMenuContent>
