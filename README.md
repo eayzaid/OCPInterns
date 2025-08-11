@@ -153,7 +153,7 @@ A comprehensive, enterprise-grade internship management platform designed for OC
 
 ### Application Management System
 ![Application Management Interface](./screenshots/ApplicationManagement.png)
-*Advanced application management system with filtering, sorting, and bulk operations for efficient candidate review*
+*Advanced application management system for efficient candidate review*
 
 ![Add New Application](./screenshots/AddApplication.png)
 *Intuitive application submission interface with comprehensive form validation and user-friendly design*
@@ -163,14 +163,14 @@ A comprehensive, enterprise-grade internship management platform designed for OC
 
 ### Location & Resource Management
 ![Location Overview](./screenshots/LocaitonOverview.png)
-*Comprehensive location management system for organizing departments, sub-departments, and geographical coordination*
+*Comprehensive location management system for organizing departments, sub-departments*
 
 ### Human Resource Management
 ![Mentors Overview](./screenshots/MentorsOverview.png)
-*Mentor management interface featuring mentor profiles, availability tracking, and mentee assignment capabilities*
+*Mentor management interface featuring mentor profiles, and mentee assignment counter*
 
 ![Recruiters Overview](./screenshots/RecuiterOverview.png)
-*Recruiter management dashboard with workload distribution, performance metrics, and candidate assignment tracking*
+*Recruiter management dashboard*
 
 ## 🛠️ Built With
 
