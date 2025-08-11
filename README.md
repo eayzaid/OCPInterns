@@ -97,30 +97,32 @@ A comprehensive, enterprise-grade internship management platform designed for OC
    ```
 
 4. **Environment Configuration**
-   ```bash
-   # Backend environment (.env)
-   cp .env.example .env
-   # Configure your MongoDB URI, JWT secrets, and other variables
    
-   # Frontend environment (.env)
-   cd ../OCPInternsFrontEnd
-   cp .env.example .env
-   # Configure your API endpoints and application settings
+   **Backend Environment (.env)**
+   ```bash
+   cd OCPInternsBackEnd
+   
+   # Create .env file with the following variables:
+   API_PORT=8080
+   MONGODB_URI=YOUR_MONGODB_CONNECTION_STRING
+   SECRET_JWT_KEY=YOUR_JWT_SECRET_KEY
+   REFRESH_JWT_KEY=YOUR_REFRESH_TOKEN_SECRET_KEY
+   WEB_APP_URL=http://localhost:5173
    ```
-
-5. **Database Setup**
-   ```bash
-   # Start MongoDB service
-   mongod
    
-   # The application will automatically create required collections
+   **Frontend Environment (.env)**
+   ```bash
+   cd OCPInternsFrontEnd
+   
+   # Create .env file with the following variables:
+   VITE_BACK_END_API_URL=http://localhost:8080
    ```
 
 6. **Run the Application**
    ```bash
    # Terminal 1 - Backend
    cd OCPInternsBackEnd
-   npm run dev
+   npm start
    
    # Terminal 2 - Frontend
    cd OCPInternsFrontEnd
@@ -129,7 +131,7 @@ A comprehensive, enterprise-grade internship management platform designed for OC
 
 7. **Access the Application**
    - Frontend: `http://localhost:5173`
-   - Backend API: `http://localhost:3000`
+   - Backend API: `http://localhost:API_PORT`
 
 ## 🎨 User Interface
 
@@ -218,8 +220,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Zaidane Ayman**
 - GitHub: [@eayzaid](https://github.com/eayzaid)
-- LinkedIn: [Your LinkedIn Profile](https://linkedin.com/in/your-profile)
-- Email: your.email@example.com
+- LinkedIn: [Your LinkedIn Profile](https://www.linkedin.com/in/zaidane-ayman/)
+- Email: aymanzaidanepro@gmail.com
 
 ---
 
